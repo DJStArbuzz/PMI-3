@@ -12,12 +12,10 @@
   <a href="#-lab9"><img alt="lab9" src="https://img.shields.io/badge/Lab9-violet"></a> 
 </p>
 
-<img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> 
-[Назад](#content)
+<img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Регистратура поликлиники – вызовы на дом (Вариант №3)
 <p aligh="justify>
 <h3">
   <a href="#client"></a>
-Регистратура поликлиники – вызовы на дом (Вариант №3)
 
   Информация о терапевтах: ФИО, телефон, номер кабинета, номер участка.
   Информация об адресах: номер участка, название улицы, список домов.
@@ -31,7 +29,7 @@
 - Вывод по каждому диагнозу количества пациентов за заданный период.
 </h3>
 </p>
-<img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Лабораторная работа №2
+<img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Лабораторная работа №1
 
 
 <p aligh="justify>
