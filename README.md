@@ -12,8 +12,11 @@
   <a href="#-lab9"><img alt="lab9" src="https://img.shields.io/badge/Lab9-violet"></a> 
 </p>
 
-# <img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Регистратура поликлиники – вызовы на дом
-
+# <img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> 
+<h3 align="center">
+  <a href="#client"></a>
+Регистратура поликлиники – вызовы на дом
+</h3>
 Информация о терапевтах: ФИО, телефон, номер кабинета, номер участка.
 Информация об адресах: номер участка, название улицы, список домов.
 Информация о вызовах: ФИО пациента, адрес, дата, время обращения, диагноз (выставляемый
