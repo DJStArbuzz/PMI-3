@@ -13,7 +13,8 @@
 </p>
 
 # <img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> 
-<h3 aligh="justify">
+<p aligh="justify>
+<h3">
   <a href="#client"></a>
 Регистратура поликлиники – вызовы на дом
 
@@ -28,7 +29,7 @@
 - Вывод для терапевта списка пациентов, ожидающих посещения врача;
 - Вывод по каждому диагнозу количества пациентов за заданный период.
 </h3>
-
+</p>
 # <img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Лабораторная работа №1
 [Назад](#content)
 <h3 aligh="justify">
