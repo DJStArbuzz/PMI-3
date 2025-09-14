@@ -52,7 +52,7 @@ ER-модель д.б. представлена в виде ER-диаграмм�
 </p3>
 
 ER-модель Поликлиники
-![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab1/l.png)
+![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab1/1.png)
 
 Реляционная модель
 ![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab1/2.png)
