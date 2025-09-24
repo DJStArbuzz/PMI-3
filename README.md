@@ -117,8 +117,6 @@ CREATE TABLE Therapist_schedule (
     end_time TIME NOT NULL
 );
 
-ALTER TABLE Therapist ADD therapist_schedule_id BIGINT REFERENCES Therapist_schedule(id) ON DELETE SET NULL;
-
 -- Таблица вызовы
 CREATE TABLE Call (
     id BIGINT PRIMARY KEY,
