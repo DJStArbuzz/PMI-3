@@ -14,7 +14,7 @@
 
 <img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Регистратура поликлиники – вызовы на дом (Вариант №3)
 <p aligh="justify>
-<h3">
+<h3>
   <a href="#client"></a>
 
   Информация о терапевтах: ФИО, телефон, номер кабинета, номер участка.
