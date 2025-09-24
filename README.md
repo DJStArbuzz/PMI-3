@@ -62,17 +62,77 @@ ER-модель Поликлиники
 <p aligh="justify>
 <h3>
   <a href="#client"></a>
-  Разработать ER-модель данной предметной области: выделить сущности, их атрибуты, связи между сущностями. 
-Для каждой сущности указать ее имя, атрибут (или набор атрибутов), являющийся первичным ключом, список остальных атрибутов.
-Для каждого атрибута указать его тип, ограничения, может ли он быть пустым, является ли он первичным ключом.
-Для каждой связи между сущностями указать: 
-- тип связи (1:1, 1:M, M:N)
-- обязательность
-
-ER-модель д.б. представлена в виде ER-диаграммы (картинка)
-
-По имеющейся ER-модели создать реляционную модель данных и отобразить ее в виде списка сущностей с их атрибутами и типами атрибутов,  для атрибутов указать, явл. ли он первичным или внешним ключом 
+В соответствии с реляционной моделью данных, разработанной в Лаб.№1, создать реляционную БД на учебном сервере БД :
+- создать таблицы, определить первичные ключи и иные ограничения
+- определить связи между таблицами
+- создать диаграмму
+- заполнить все таблицы адекватной информацией (не меньше 10 записей в таблицах, наличие примеров для связей типа 1:M )
 
 </h3>
 </p3>
+
+![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab2/main.png)
+```
+-- Таблица участков
+CREATE TABLE District (
+    id BIGINT PRIMARY KEY,
+    district_number BIGINT NOT NULL UNIQUE,
+    streets NVARCHAR NOT NULL
+);
+
+-- Таблица диагнозов
+CREATE TABLE Diagnosis (
+    id BIGINT PRIMARY KEY,
+    name CHAR(100) NOT NULL UNIQUE,
+    description CHAR
+);
+
+-- Таблица пациентов
+CREATE TABLE Patient (
+    id BIGINT PRIMARY KEY,
+    full_name CHAR(100) NOT NULL,
+    street CHAR(100) NOT NULL,
+    house_number BIGINT NOT NULL,
+    district_id BIGINT REFERENCES District(id) ON DELETE SET NULL
+);
+
+-- Таблица терапевтов
+CREATE TABLE Therapist (
+    id BIGINT PRIMARY KEY,
+    full_name CHAR(100) NOT NULL,
+    phone CHAR(12),
+    office_number BIGINT NOT NULL,
+    district_id BIGINT REFERENCES District(id) ON DELETE SET NULL,
+ );
+
+-- Таблица графиков работы
+CREATE TABLE Therapist_schedule (
+    id BIGINT PRIMARY KEY,
+    therapist_id BIGINT REFERENCES Therapist(id) ON DELETE CASCADE,
+    day_of_week SMALLINT NOT NULL CHECK (day_of_week BETWEEN 1 AND 7),
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL
+);
+
+ALTER TABLE Therapist ADD therapist_schedule_id BIGINT REFERENCES Therapist_schedule(id) ON DELETE SET NULL;
+
+-- Таблица вызовы
+CREATE TABLE Call (
+    id BIGINT PRIMARY KEY,
+    appeal_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    visit_status BIT NOT NULL DEFAULT 0,
+    patient_id BIGINT REFERENCES Patient(id) ON DELETE CASCADE,
+    therapist_id BIGINT REFERENCES Therapist(id) ON DELETE SET NULL
+);
+
+-- Таблица вызовы-диагноз
+CREATE TABLE Call_diagnosis (
+    diagnosis_id BIGINT REFERENCES Diagnosis(id) ON DELETE CASCADE,
+    call_id BIGINT REFERENCES Call(id) ON DELETE CASCADE,
+    doctor_comment CHAR,
+    PRIMARY KEY (diagnosis_id, call_id)
+);
+```
 ![image](/sources/yargu.png)
