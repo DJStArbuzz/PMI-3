@@ -44,7 +44,7 @@ CREATE TABLE Call (
     id BIGINT PRIMARY KEY IDENTITY(1,1),
     appeal_date DATE NOT NULL,
     start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
+    end_time TIME,
     visit_status BIT NOT NULL DEFAULT 0,
     patient_id BIGINT REFERENCES Patient(id) ON DELETE CASCADE,
     therapist_id BIGINT REFERENCES Therapist(id) ON DELETE SET NULL
