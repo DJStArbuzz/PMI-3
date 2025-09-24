@@ -1,0 +1,61 @@
+-- Таблица участков
+CREATE TABLE District (
+    id BIGINT PRIMARY KEY,
+    district_number BIGINT NOT NULL UNIQUE,
+    streets NVARCHAR NOT NULL
+);
+
+-- Таблица диагнозов
+CREATE TABLE Diagnosis (
+    id BIGINT PRIMARY KEY,
+    name CHAR(100) NOT NULL UNIQUE,
+    description CHAR
+);
+
+-- Таблица пациентов
+CREATE TABLE Patient (
+    id BIGINT PRIMARY KEY,
+    full_name CHAR(100) NOT NULL,
+    street CHAR(100) NOT NULL,
+    house_number BIGINT NOT NULL,
+    district_id BIGINT REFERENCES District(id) ON DELETE SET NULL
+);
+
+-- Таблица терапевтов
+CREATE TABLE Therapist (
+    id BIGINT PRIMARY KEY,
+    full_name CHAR(100) NOT NULL,
+    phone CHAR(12),
+    office_number BIGINT NOT NULL,
+    district_id BIGINT REFERENCES District(id) ON DELETE SET NULL,
+ );
+
+-- Таблица графиков работы
+CREATE TABLE Therapist_schedule (
+    id BIGINT PRIMARY KEY,
+    therapist_id BIGINT REFERENCES Therapist(id) ON DELETE CASCADE,
+    day_of_week SMALLINT NOT NULL CHECK (day_of_week BETWEEN 1 AND 7),
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL
+);
+
+ALTER TABLE Therapist ADD therapist_schedule_id BIGINT REFERENCES Therapist_schedule(id) ON DELETE SET NULL;
+
+-- Таблица вызовы
+CREATE TABLE Call (
+    id BIGINT PRIMARY KEY,
+    appeal_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    visit_status BIT NOT NULL DEFAULT 0,
+    patient_id BIGINT REFERENCES Patient(id) ON DELETE CASCADE,
+    therapist_id BIGINT REFERENCES Therapist(id) ON DELETE SET NULL
+);
+
+-- Таблица вызовы-диагноз
+CREATE TABLE Call_diagnosis (
+    diagnosis_id BIGINT REFERENCES Diagnosis(id) ON DELETE CASCADE,
+    call_id BIGINT REFERENCES Call(id) ON DELETE CASCADE,
+    doctor_comment CHAR,
+    PRIMARY KEY (diagnosis_id, call_id)
+);
