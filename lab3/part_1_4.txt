@@ -1,0 +1,29 @@
+--4. Функции ранжирования
+
+--4.1 Привести примеры 3-4 запросов с использованием ROW_NUMBER, RANK, DENSE_RANK (c  PARTITION BY и без
+
+SELECT 
+    ROW_NUMBER() OVER(ORDER BY street) as 'нум.',
+    full_name,
+    street,
+    house_number
+FROM Patient;
+
+SELECT 
+    therapist_id,
+    appeal_date,
+    start_time,
+    ROW_NUMBER() OVER(
+        PARTITION BY therapist_id 
+        ORDER BY appeal_date, start_time
+    ) as 'номер обращения'
+FROM Call;
+
+SELECT 
+    t.full_name as 'терапевт',
+    COUNT(*) as 'кол-во вызовов',
+    RANK() OVER (ORDER BY COUNT(*) DESC) as 'ранк'
+FROM Call c
+JOIN Therapist t ON c.therapist_id = t.id
+WHERE c.visit_status = 1
+GROUP BY t.id, t.full_name;
