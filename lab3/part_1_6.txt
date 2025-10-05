@@ -1,0 +1,45 @@
+/*
+6. Использование CASE, PIVOT и UNPIVOT.
+6.1 Привести примеры получения сводных (итоговых) таблиц 
+с использованием CASE
+*/
+
+SELECT 
+    district_id, 
+    COUNT(*) AS 'кол-вл пациентов',
+    SUM(CASE WHEN d.name = 'ОРВИ' THEN 1 ELSE 0 END) AS 
+    'с ОРВИ'
+FROM Patient p
+LEFT JOIN Call c ON p.id = c.patient_id
+LEFT JOIN Call_diagnosis cd ON c.id = cd.call_id
+LEFT JOIN Diagnosis d ON cd.diagnosis_id = d.id
+GROUP BY district_id
+
+SELECT 
+    d.district_number AS 'номер участка', 
+    COUNT(P.ID) AS 'кол-во пациентов',
+    SUM(CASE WHEN c.id IS NOT NULL THEN 1 ELSE 0 END) 
+    AS 'кол-во обращений',
+    SUM(CASE WHEN c.visit_status = 1 THEN 1 ELSE 0 END) 
+    AS 'кол-во заверш. визитов'
+FROM District d
+LEFT JOIN Patient p ON d.ID = p.district_id
+LEFT JOIN Call c ON p.ID = c.patient_id
+GROUP BY d.district_number
+
+--6.2 Привести примеры получения сводных (итоговых)
+--таблиц с использованием PIVOT и UNPIVOT.
+
+SELECT *
+FROM (
+    SELECT di.district_number, d.name, cd.call_id
+    FROM Call_diagnosis cd
+    JOIN Call c ON cd.call_id = c.id
+    JOIN Patient p ON C.patient_id = p.id
+    JOIN District di ON P.district_id = di.id
+    JOIN Diagnosis d ON cd.diagnosis_id = d.id
+) AS SOURCE
+PIVOT (
+    COUNT(call_id)
+    FOR name IN ([ОРВИ], [Грипп], [Гипертония])
+) as Pivot_table
