@@ -1,0 +1,195 @@
+/*2. Выборка из нескольких таблиц.
+2.1 Вывести информацию подчиненной (дочерней) таблицы, заменяя коды
+(значения внешних ключей) соответствующими символьными значениями из
+родительских таблиц. Привести 2-3 запроса с использованием классического
+подхода соединения таблиц (where).
+*/
+
+SELECT 
+    p.full_name as 'ФИО пациента',
+    p.street as 'Улица', 
+    p.house_number as 'Дом',
+    d.district_number as 'Номер участка'
+FROM Patient p, District d
+WHERE p.district_id = d.id;
+
+SELECT 
+    c.appeal_date as 'Дата вызова',
+    c.start_time as 'Время начала',
+    c.end_time as 'Время окончания',
+    p.full_name as 'Пациент',
+    t.full_name as 'Терапевт'
+FROM Call c, Patient p, Therapist t
+WHERE c.patient_id = p.id AND c.therapist_id = t.id;
+
+SELECT 
+    c.appeal_date as 'Дата',
+    d.name as 'Диагноз',
+    cd.doctor_comment as 'Комментарий врача'
+FROM Call_diagnosis cd, Call c, Diagnosis d
+WHERE cd.call_id = c.id AND cd.diagnosis_id = d.id;
+
+--2.2. Реализовать запросы пункта 2.1 через внутреннее соединение inner join. 
+
+SELECT 
+    p.full_name as 'ФИО пациента',
+    p.street as 'Улица', 
+    p.house_number as 'Дом',
+    d.district_number as 'Номер участка'
+FROM Patient p
+INNER JOIN District d ON p.district_id = d.id;
+
+SELECT 
+    c.appeal_date as 'Дата вызова',
+    c.start_time as 'Время начала',
+    c.end_time as 'Время окончания',
+    p.full_name as 'Пациент',
+    t.full_name as 'Терапевт'
+FROM Call c
+INNER JOIN Patient p ON c.patient_id = p.id
+INNER JOIN Therapist t ON c.therapist_id = t.id;
+
+SELECT 
+    c.appeal_date as 'Дата',
+    d.name as 'Диагноз',
+    cd.doctor_comment as 'Комментарий врача'
+FROM Call_diagnosis cd
+INNER JOIN Call c ON cd.call_id = c.id
+INNER JOIN Diagnosis d ON cd.diagnosis_id = d.id;
+
+
+--2.3. Левое внешнее соединение left join. Привести 2-3 запроса.
+
+SELECT 
+    d.district_number as 'Номер участка',
+    d.streets as 'Улицы участка',
+    p.full_name as 'Пациент'
+FROM District d
+LEFT JOIN Patient p ON d.id = p.district_id;
+
+
+SELECT 
+    t.full_name as 'Терапевт',
+    t.phone as 'Телефон',
+    c.appeal_date as 'Дата вызова',
+    c.visit_status as 'Статус посещения'
+FROM Therapist t
+LEFT JOIN Call c ON t.id = c.therapist_id;
+
+
+SELECT 
+    p.full_name as 'Пациент',
+    p.street as 'Улица',
+    c.appeal_date as 'Дата вызова',
+    c.visit_status as 'Статус'
+FROM Patient p
+LEFT JOIN Call c ON p.id = c.patient_id;
+
+-- 2.4. Правое внешнее соединение right join. Привести 2-3 запроса 
+
+SELECT 
+    d.name as 'Диагноз',
+    d.description as 'Описание',
+    cd.doctor_comment as 'Комментарий врача',
+    c.appeal_date as 'Дата вызова'
+FROM Call_diagnosis cd
+RIGHT JOIN Diagnosis d ON cd.diagnosis_id = d.id
+LEFT JOIN Call c ON cd.call_id = c.id
+ORDER BY d.name;
+
+SELECT 
+    ts.day_of_week as 'День недели',
+    ts.start_time as 'Начало работы',
+    ts.end_time as 'Окончание работы',
+    t.full_name as 'Терапевт'
+FROM Therapist_schedule ts
+RIGHT JOIN Therapist t ON ts.therapist_id = t.id
+ORDER BY t.full_name, ts.day_of_week;
+
+
+SELECT 
+    d.district_number as 'Номер участка',
+    d.streets as 'Улицы участка',
+    t.full_name as 'Терапевт'
+FROM District d
+RIGHT JOIN Therapist t ON d.id = t.district_id
+ORDER BY d.district_number;
+
+-- 2.5. Привести примеры 2-3 запросов с использованием агрегатных функций
+--и группировки.
+
+SELECT 
+    t.full_name as 'Терапевт',
+    COUNT(c.id) as 'Количество вызовов',
+    SUM(CASE WHEN c.visit_status = 1 THEN 1 ELSE 0 END) as 'Посещенные',
+    SUM(CASE WHEN c.visit_status = 0 THEN 1 ELSE 0 END) as 'Непосещенные'
+FROM Therapist t
+LEFT JOIN Call c ON t.id = c.therapist_id
+GROUP BY t.full_name;
+
+SELECT 
+    d.district_number as 'Номер участка',
+    COUNT(DISTINCT p.id) as 'Количество пациентов',
+    COUNT(c.id) as 'Количество вызовов'
+FROM District d
+LEFT JOIN Patient p ON d.id = p.district_id
+LEFT JOIN Call c ON p.id = c.patient_id
+GROUP BY d.district_number;
+
+-- 2.6. Привести примеры 2-3 запросов с использованием группировки и условия отбора групп (Having).
+
+SELECT 
+    t.full_name as 'Терапевт',
+    COUNT(c.id) as 'Количество вызовов'
+FROM Therapist t
+JOIN Call c ON t.id = c.therapist_id
+GROUP BY t.full_name
+HAVING COUNT(c.id) > 2;
+
+
+SELECT 
+    street as 'Улица',
+    COUNT(*) as 'Количество пациентов'
+FROM Patient
+GROUP BY street
+HAVING COUNT(*) > 3;
+
+SELECT 
+    p.full_name as 'Пациент',
+    COUNT(c.id) as 'Количество вызовов'
+FROM Patient p
+JOIN Call c ON p.id = c.patient_id
+GROUP BY p.full_name
+HAVING COUNT(c.id) > 1;
+
+
+-- 2.7. Привести примеры 3-4 вложенных (соотнесенных, c использованием IN, EXISTS) запросов.
+SELECT 
+    full_name as 'Пациент',
+    street as 'Улица',
+    house_number as 'Дом'
+FROM Patient
+WHERE district_id IN (
+    SELECT id FROM District WHERE district_number IN (1, 2)
+);
+
+SELECT 
+    full_name as 'Терапевт'
+FROM Therapist t
+WHERE EXISTS (
+    SELECT 1 
+    FROM Call c 
+    WHERE c.therapist_id = t.id 
+    AND c.appeal_date BETWEEN '2024-01-01' AND '2024-01-15'
+);
+
+SELECT 
+    name as 'Диагноз',
+    description as 'Описание'
+FROM Diagnosis d
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM Call_diagnosis cd 
+    WHERE cd.diagnosis_id = d.id
+);
+
