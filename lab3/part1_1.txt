@@ -32,36 +32,35 @@ WHERE street = 'Улица Мира';
 --1.3 Привести примеры 2-3 запросов с использованием агрегатных функций
 --(count, max, sum и др.) с группировкой и без группировки. 
 
-SELECT d.district_number, COUNT(p.id) as 'кол-во пациентов'
-FROM District d
-LEFT JOIN Patient p ON d.id = p.district_id
-GROUP BY d.district_number;
+SELECT appeal_date,
+    COUNT(*) as 'кол-во_вызовов',
+    SUM(CASE WHEN visit_status = 1 THEN 1 ELSE 0 END) as 'посещенные'
+FROM Call
+GROUP BY appeal_date;
 
-SELECT street,
+SELECT 
+    COUNT(*) as 'общее_кол-во_пациентов',
     MAX(house_number) as 'наибольший номер дома',
-    MIN(house_number) as 'наименьший номер дома'
-FROM Patient
-GROUP BY street;
+    MIN(house_number) as 'минимальный номер дома',
+    AVG(house_number) as 'средний номер дома'
+FROM Patient;
+
 
 --1.4  Привести примеры подведения подытога с использованием GROUP BY [ALL] [ CUBE | ROLLUP](2-3 запроса). В ROLLUP и CUBE использовать не менее 2-х столбцов.
 
-SELECT 
-    appeal_date,
-    visit_status,
-    COUNT(*) as 'кол-во вызовов'
-FROM Call
-GROUP BY ROLLUP (appeal_date, visit_status)
-ORDER BY appeal_date, visit_status;
+SELECT street,
+    house_number,
+    COUNT(*) as 'кол-во_пациентов'
+FROM Patient
+GROUP BY ROLLUP (street, house_number)
+ORDER BY street, house_number;
 
-SELECT 
-    d.district_number as 'district_number',
-    c.visit_status as 'visit_status',
-    COUNT(c.id) as 'кол-во вызовов'
-FROM Call c
-JOIN Patient p ON c.patient_id = p.id
-JOIN District d ON p.district_id = d.id
-GROUP BY CUBE (d.district_number, c.visit_status)
-ORDER BY d.district_number, c.visit_status;
+SELECT appeal_date,
+    visit_status,
+    COUNT(*) as 'кол-во_вызовов'
+FROM Call
+GROUP BY CUBE (appeal_date, visit_status)
+ORDER BY appeal_date, visit_status;
 
 --1.5 Выбрать из таблиц информацию об объектах, в названиях которых нет заданной последовательности букв (LIKE).
 
