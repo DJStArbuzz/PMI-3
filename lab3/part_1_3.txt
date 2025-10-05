@@ -1,0 +1,53 @@
+--3. Представления
+--3.1  На основе любых запросов из п. 2 создать два представления (VIEW).
+
+CREATE VIEW PatientDistrictsView
+AS SELECT 
+    p.full_name as 'ФИО',
+    p.street as 'улица', 
+    p.house_number as 'номер дома',
+    d.district_number as 'номер участка'
+FROM Patient p
+INNER JOIN District d ON p.district_id = d.id;
+GO
+SELECT * FROM PatientDistrictsView;
+
+DROP VIEW PatientDistrictsView;
+
+
+CREATE VIEW TherapistCallsView AS
+SELECT t.full_name as 'терапевт',
+    COUNT(c.id) as 'кол-во вызовов'
+FROM Therapist t
+LEFT JOIN Call c ON t.id = c.therapist_id
+GROUP BY t.id, t.full_name;
+GO
+SELECT * FROM TherapistCallsView;
+DROP VIEW TherapistCallsView;
+
+--3.2  Привести примеры использования общетабличных выражений (СТЕ) (2-3 запроса)
+
+WITH DistrictStats AS (
+    SELECT 
+        d.district_number AS 'номер участка',
+        t.full_name AS 'терапевт',
+        COUNT(p.id) AS 'кол-во пациентов'
+    FROM District d
+    LEFT JOIN Therapist t ON d.id = t.district_id
+    LEFT JOIN Patient p ON d.id = p.district_id
+    GROUP BY d.district_number, t.full_name
+)
+SELECT * FROM DistrictStats
+ORDER BY 'номер участка';
+
+WITH TherapistStats AS (
+    SELECT 
+        t.full_name as therapist_name, 
+        COUNT(c.id) as call_count
+    FROM Therapist t 
+    LEFT JOIN Call c ON t.id = c.therapist_id
+    GROUP BY t.full_name
+)
+SELECT therapist_name, call_count 
+FROM TherapistStats 
+WHERE call_count > 3;
