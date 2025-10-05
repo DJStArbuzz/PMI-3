@@ -1,0 +1,27 @@
+--5. Объдинение, пересечение, разность
+--5.1 Привести примеры 3-4 запросов с использованием UNION / UNION ALL, EXCEPT, INTERSECT. Данные  в одном из запросов отсортируйте по произвольному признаку.
+
+SELECT full_name, 'пациент' as person_type
+FROM Patient
+UNION
+SELECT full_name, 'терапевт' as person_type
+FROM Therapist
+ORDER BY full_name;
+
+
+SELECT id, full_name
+FROM Patient
+EXCEPT
+SELECT DISTINCT p.id, p.full_name
+FROM Patient p
+JOIN Call c ON p.id = c.patient_id
+ORDER BY full_name;
+
+SELECT therapist_id
+FROM Therapist_schedule
+WHERE day_of_week = 1
+
+INTERSECT
+SELECT therapist_id
+FROM Therapist_schedule
+WHERE day_of_week = 5 
