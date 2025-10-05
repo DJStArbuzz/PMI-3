@@ -1,0 +1,81 @@
+--Часть 2
+--Составить следующие запросы:
+--a)  Выбрать пациентов (ФИО), которые за последний месяц > 3 раз вызывали врача
+SELECT P.full_name
+FROM Patient P
+JOIN Call C ON P.id = C.patient_id
+WHERE YEAR(C.appeal_date) = 2024 AND MONTH(C.appeal_date) = 1
+GROUP BY P.id, P.full_name
+HAVING COUNT(C.id) > 0;
+
+-- в таблице пациенты по одному разу обследовались
+-- ключевая строка HAVING COUNT(C.id) > 0;
+-- 0 можно заменить на 3, но выведется пустая строка
+
+--b)  Выдать пациентов, ожидающих посещения врача (ФИО,адрес,участок,врач)
+SELECT 
+    P.full_name AS ФИО,
+    P.street + ', д.' + CAST(P.house_number AS VARCHAR) AS адрес,
+    D.district_number AS участок,
+    T.full_name AS врач
+FROM Patient P
+JOIN Call C ON P.id = C.patient_id
+JOIN Therapist T ON C.therapist_id = T.id
+JOIN District D ON P.district_id = D.id
+WHERE C.visit_status = 0;
+
+--c)  По адресу пациента определить номер участка
+-- версия по district_id
+SELECT 
+    P.full_name,
+    P.street,
+    P.house_number,
+    D.district_number AS номер_участка
+FROM Patient P
+JOIN District D ON P.district_id = D.id;
+
+-- 2ой варинат
+SELECT 
+    P.full_name,
+    P.street,
+    P.house_number,
+    D.district_number AS номер_участка
+FROM Patient P
+JOIN District D ON 
+    D.streets LIKE '%' + P.street + '%';
+
+--d)  По дате и времени обращения определить примерное 
+-- время посещения врача (предполагая, что на каждое посещение врач тратит 30 мин. и выход на вызова начинается с 12 ч.)
+
+SELECT 
+    id,
+    appeal_date,
+    start_time,
+    end_time,
+    visit_status,
+    patient_id,
+    therapist_id,
+   DATEADD(
+        MINUTE, 
+        (ROW_NUMBER() OVER (PARTITION BY appeal_date ORDER BY start_time) - 1) * 30,
+        CAST(appeal_date AS DATETIME) + CAST('12:00:00' AS DATETIME)
+    ) AS estimated_visit_time
+FROM Call
+ORDER BY appeal_date, start_time;
+
+--e)  Определить диагнозы, по которым превышен порог заболеваемости 10% (от общего количества вызовов) и выдать для каждого из них количество вызовов
+WITH DiagnosisStats AS (
+    SELECT 
+        D.name AS диагноз,
+        COUNT(CD.diagnosis_id) AS количество_вызовов,
+        COUNT(CD.diagnosis_id) * 100.0 / (SELECT COUNT(*) FROM Call_diagnosis) AS процент
+    FROM Call_diagnosis CD
+    JOIN Diagnosis D ON CD.diagnosis_id = D.id
+    GROUP BY D.id, D.name
+)
+SELECT 
+    диагноз,
+    количество_вызовов,
+    процент
+FROM DiagnosisStats
+WHERE процент > 10;
