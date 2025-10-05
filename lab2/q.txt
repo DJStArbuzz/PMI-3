@@ -1,70 +1,69 @@
--- Таблица Участок
+IF OBJECT_ID('Call_diagnosis', 'U') IS NOT NULL DROP TABLE Call_diagnosis;
+IF OBJECT_ID('Call', 'U') IS NOT NULL DROP TABLE Call;
+IF OBJECT_ID('Therapist_schedule', 'U') IS NOT NULL DROP TABLE Therapist_schedule;
+IF OBJECT_ID('Therapist', 'U') IS NOT NULL DROP TABLE Therapist;
+IF OBJECT_ID('Patient', 'U') IS NOT NULL DROP TABLE Patient;
+IF OBJECT_ID('Diagnosis', 'U') IS NOT NULL DROP TABLE Diagnosis;
+IF OBJECT_ID('District', 'U') IS NOT NULL DROP TABLE District;
+
 CREATE TABLE District (
-    id BIGINT PRIMARY KEY IDENTITY(1,1),
-    district_number BIGINT NOT NULL UNIQUE,
-    streets NVARCHAR(MAX) NOT NULL  
+    id INT PRIMARY KEY IDENTITY(1,1),
+    district_number INT NOT NULL UNIQUE,
+    streets NVARCHAR(500) NOT NULL
 );
 
--- Таблица Диагноз
 CREATE TABLE Diagnosis (
-    id BIGINT PRIMARY KEY IDENTITY(1,1),
+    id INT PRIMARY KEY IDENTITY(1,1),
     name NVARCHAR(100) NOT NULL UNIQUE,
-    description NVARCHAR(MAX)
+    description NVARCHAR(1000) NOT NULL DEFAULT ''
 );
 
--- Таблица Пациент
 CREATE TABLE Patient (
-    id BIGINT PRIMARY KEY IDENTITY(1,1),
+    id INT PRIMARY KEY IDENTITY(1,1),
     full_name NVARCHAR(100) NOT NULL,
     street NVARCHAR(100) NOT NULL,
-    house_number BIGINT NOT NULL,
-    district_id BIGINT REFERENCES District(id) ON DELETE SET NULL
+    house_number INT NOT NULL,
+    district_id INT NOT NULL REFERENCES District(id) ON DELETE NO ACTION
 );
 
--- Таблица Терапевт
 CREATE TABLE Therapist (
-    id BIGINT PRIMARY KEY IDENTITY(1,1),
+    id INT PRIMARY KEY IDENTITY(1,1),
     full_name NVARCHAR(100) NOT NULL,
-    phone NVARCHAR(50) NOT NULL,  
-    office_number BIGINT NOT NULL,
-    district_id BIGINT REFERENCES District(id) ON DELETE SET NULL
+    phone NVARCHAR(20) NOT NULL,
+    office_number INT NOT NULL,
+    district_id INT NOT NULL REFERENCES District(id) ON DELETE NO ACTION
 );
 
--- Таблица График работы (Расписание терапевта)
 CREATE TABLE Therapist_schedule (
-    id BIGINT PRIMARY KEY IDENTITY(1,1),
-    therapist_id BIGINT REFERENCES Therapist(id) ON DELETE CASCADE,
+    id INT PRIMARY KEY IDENTITY(1,1),
+    therapist_id INT NOT NULL REFERENCES Therapist(id) ON DELETE CASCADE,
     day_of_week SMALLINT NOT NULL CHECK (day_of_week BETWEEN 1 AND 7),
     start_time TIME NOT NULL,
     end_time TIME NOT NULL
 );
 
--- Таблица Вызов
 CREATE TABLE Call (
-    id BIGINT PRIMARY KEY IDENTITY(1,1),
+    id INT PRIMARY KEY IDENTITY(1,1),
     appeal_date DATE NOT NULL,
     start_time TIME NOT NULL,
-    end_time TIME,
+    end_time TIME NOT NULL DEFAULT '00:00',
     visit_status BIT NOT NULL DEFAULT 0,
-    patient_id BIGINT REFERENCES Patient(id) ON DELETE CASCADE,
-    therapist_id BIGINT REFERENCES Therapist(id) ON DELETE SET NULL
+    patient_id INT NOT NULL REFERENCES Patient(id) ON DELETE CASCADE,
+    therapist_id INT NOT NULL REFERENCES Therapist(id) ON DELETE NO ACTION
 );
 
--- Таблица Вызов-диагноз
 CREATE TABLE Call_diagnosis (
-    diagnosis_id BIGINT REFERENCES Diagnosis(id) ON DELETE CASCADE,
-    call_id BIGINT REFERENCES Call(id) ON DELETE CASCADE,
-    doctor_comment NVARCHAR(MAX),
+    diagnosis_id INT NOT NULL REFERENCES Diagnosis(id) ON DELETE CASCADE,
+    call_id INT NOT NULL REFERENCES Call(id) ON DELETE CASCADE,
+    doctor_comment NVARCHAR(500) NOT NULL DEFAULT '',
     PRIMARY KEY (diagnosis_id, call_id)
 );
-
 
 INSERT INTO District (district_number, streets) VALUES
 (1, N'Улица Ленина, Улица Мира, Улица Гагарина'),
 (2, N'Улица Пушкина, Улица Чехова, Улица Толстого'),
 (3, N'Улица Советская, Улица Кирова, Улица Карла Маркса'),
 (4, N'Улица Садовая, Улица Цветочная, Улица Парковая');
-
 
 INSERT INTO Diagnosis (name, description) VALUES
 (N'ОРВИ', N'Острая респираторная вирусная инфекция'),
@@ -101,7 +100,7 @@ INSERT INTO Patient (full_name, street, house_number, district_id) VALUES
 (N'Тюменева Екатерина Андреевна', N'Улица Мира', 29, 1),
 (N'Хрулев Иван Сергеевич', N'Улица Пушкина', 6, 2),
 (N'Чернышова Мария Ивановна', N'Улица Чехова', 21, 2),
-(N'Шебета Николай Иванович', N'Улица Садовая', 33, 4),
+(N'Шебета Сергей Иванович', N'Улица Садовая', 33, 4),
 (N'Шипицын Денис Александрович', N'Улица Цветочная', 16, 4);
 
 INSERT INTO Therapist (full_name, phone, office_number, district_id) VALUES
@@ -109,6 +108,7 @@ INSERT INTO Therapist (full_name, phone, office_number, district_id) VALUES
 (N'Вихарев Кирилл Алексеевич', N'+7-900-234-56-78', 102, 1),
 (N'Семенов Евгений Николаевич', N'+7-900-345-67-89', 103, 2),
 (N'Кудрявцев Матвей Владимирович', N'+7-900-456-78-90', 104, 3);
+
 
 INSERT INTO Therapist_schedule (therapist_id, day_of_week, start_time, end_time) VALUES
 (1, 1, '08:00', '16:00'),
