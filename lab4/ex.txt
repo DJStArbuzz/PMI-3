@@ -66,7 +66,7 @@ WHERE t.district_id = @max_district;
 END;  
 GO  
 
-DECLARE @doctor_max WARCHAR(100);  
+DECLARE @doctor_max NVARCHAR(100);  
 EXEC GetTherapistMaxHouses @therapist_name = @doctor_max OUTPUT;  
 SELECT @doctor_max AS doctor_max_houses;
 
@@ -137,7 +137,7 @@ BEGIN
 END;
 GO
 
-SELECT * FROM dbo.GetWaitingPatients(d);
+SELECT * FROM dbo.GetWaitingPatients(4);
 
 --Триггер любого типа на добавление нового врача – если номер участка совпадает с номером какого-то другого врача, то вывод предупреждения и запись не добавляется
 CREATE TRIGGER PreventDiagnosisUpdate
