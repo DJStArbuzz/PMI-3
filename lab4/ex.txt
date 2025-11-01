@@ -1,0 +1,16 @@
+CREATE PROCEDURE GetTodayCallsTest2
+AS
+BEGIN
+    SELECT 
+        t.full_name AS therapist_name,
+        p.full_name AS patient_name,
+        c.start_time,
+        c.visit_status
+    FROM Call c
+    JOIN Therapist t ON c.therapist_id = t.id
+    JOIN Patient p ON c.patient_id = p.id
+    WHERE c.appeal_date = CAST(GETDATE() AS DATE)
+    ORDER BY t.full_name, c.start_time;
+END;
+GO
+EXEC GetTodayCallsTest2;
