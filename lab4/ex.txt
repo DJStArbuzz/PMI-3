@@ -1,16 +1,201 @@
+--a)  Процедура без параметров, формирующая список вызовов по каждому врачу на текущий день
 CREATE PROCEDURE GetTodayCallsTest2
 AS
 BEGIN
-    SELECT 
-        t.full_name AS therapist_name,
-        p.full_name AS patient_name,
-        c.start_time,
-        c.visit_status
-    FROM Call c
-    JOIN Therapist t ON c.therapist_id = t.id
-    JOIN Patient p ON c.patient_id = p.id
-    WHERE c.appeal_date = CAST(GETDATE() AS DATE)
-    ORDER BY t.full_name, c.start_time;
+SELECT
+	t.full_name AS therapist_name,
+	p.full_name AS patient_name,
+	c.start_time,
+	c.visit_status
+FROM Call c
+	JOIN Therapist t ON c.therapist_id = t.id  
+	JOIN Patient p ON c.patient_id = p.id  
+WHERE c.appeal_date = CAST(GETDATE() AS DATE)  
+ORDER BY t.full_name, c.start_time;
 END;
 GO
+
 EXEC GetTodayCallsTest2;
+
+
+--b) Процедура, на входе получающая номер участка и формирующая список улиц, находящихся на этом участке
+CREATE PROCEDURE GetDistrictStreets
+    @district_number INT
+AS
+BEGIN
+    SELECT streets
+    FROM District
+    WHERE district_number = @district_number;
+END;
+GO
+
+EXEC GetDistrictStreets @district_number = 1;
+
+
+--c) Процедура, на входе получающая номер участка, как выходной параметр выдает ФИО врача, обслуживающего данный участок
+CREATE PROCEDURE GetDistrictTherapist
+    @district_number INT,
+    @therapist_name NVARCHAR(100) OUTPUT
+AS
+BEGIN
+    SELECT @therapist_name = t.full_name
+    FROM Therapist t
+    INNER JOIN District d ON t.district_id = d.id
+    WHERE d.district_number = @district_number;
+END;
+GO
+
+DECLARE @doctor NVARCHAR(100);
+EXEC GetDistrictTherapist @district_number = 1, @therapist_name = @doctor OUTPUT;
+SELECT @doctor AS doctor;
+
+
+--Процедура, находящаяся один из участков с максимальным количеством домов и возвращающая ФИО врача, обслуживающего данный участок (с использованием вызова предыдущей процедуры)
+CREATE PROCEDURE GetTherapistMaxHouses  
+@therapist_name WARCHAR(100) OUTPUT  
+AS  
+BEGIN  
+DECLARE @max_district INT;  
+SELECT TOP 1 @max_district = p.district_id  
+FROM Patient p  
+GROUP BY p.district_id  
+ORDER BY COUNT(DISTINCT p.house_number) DESC;  
+SELECT @therapist_name = t.full_name  
+FROM Therapist t  
+WHERE t.district_id = @max_district;  
+END;  
+GO  
+
+DECLARE @doctor_max WARCHAR(100);  
+EXEC GetTherapistMaxHouses @therapist_name = @doctor_max OUTPUT;  
+SELECT @doctor_max AS doctor_max_houses;
+
+
+--Скалярная функция, возвращающая по адресу (улица, дом) номер участка
+CREATE FUNCTION GetDistrictByAddress(
+    @street NVARCHAR(100),
+    @house_number INT
+)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @district_number INT;
+
+    SELECT @district_number = d.district_number
+    FROM Patient p
+    INNER JOIN District d ON p.district_id = d.id
+    WHERE p.street = @street AND p.house_number = @house_number;
+
+    RETURN @district_number;
+END;
+GO
+
+SELECT dbo.GetDistrictByAddress(N'Улица Ленина', 10) as district_number;
+
+
+--Inline-функция вызовов пациента за год
+CREATE FUNCTION GetPatientCallsCurrentYear(
+    @patient_id INT
+)
+RETURNS TABLE
+AS
+RETURN
+    SELECT
+    appeal_date,
+    start_time,
+    end_time,
+    visit_status
+    FROM Call
+    WHERE patient_id = @patient_id
+    AND YEAR(appeal_date) = YEAR(GETDATE());
+GO
+
+SELECT * FROM GetPatientCallsCurrentYear(1);
+
+--Multi-statement функция ожидающих пациентов
+CREATE FUNCTION GetWaitingPatients(
+    @therapist_id INT
+)
+RETURNS @result TABLE (
+    patient_name NVARCHAR(100),
+    address NVARCHAR(200),
+    visit_time TIME
+)
+AS
+BEGIN
+    INSERT INTO @result
+    SELECT
+    p.full_name,
+    p.street + ' ' + CAST(p.house_number AS NVARCHAR(10)),
+    c.start_time
+    FROM Call c
+    JOIN Patient p ON c.patient_id = p.id
+    WHERE c.therapist_id = @therapist_id
+    AND c.visit_status = 0;
+
+    RETURN;
+END;
+GO
+
+SELECT * FROM dbo.GetWaitingPatients(d);
+
+--Триггер любого типа на добавление нового врача – если номер участка совпадает с номером какого-то другого врача, то вывод предупреждения и запись не добавляется
+CREATE TRIGGER PreventDiagnosisUpdate
+ON Call_diagnosis
+FOR UPDATE
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM inserted)
+    BEGIN
+    RAISERROR('Нельзя изменять уже выставленный диагноз!', 16, 1);
+    ROLLBACK TRANSACTION;
+    END
+END;
+GO
+
+UPDATE Call_diagnosis
+SET doctor_comment = 'Новый комментарий'
+WHERE diagnosis_id = 1 AND call_id = 1;
+
+
+--Последующий триггер на изменение диагноза посещения – если диагноз уже был выставлен, то его менять нельзя
+CREATE TRIGGER PreventDiagnosisUpdate
+ON Call_diagnosis
+FOR UPDATE
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM inserted)
+    BEGIN
+    RAISERROR('Нельзя изменять уже выставленный диагноз!', 16, 1);
+    ROLLBACK TRANSACTION;
+    END
+END;
+GO
+
+UPDATE Call_diagnosis
+SET doctor_comment = 'Новый комментарий'
+WHERE diagnosis_id = 1 AND call_id = 1;
+
+--Замещающий триггер на операцию отмены вызова – если врач еще не посетил этого пациента, то вызов можно отменить, в противном случае строка с этим вызовом не удаляется
+CREATE VIEW CallView
+AS
+SELECT id, appeal_date, start_time, end_time, visit_status, patient_id, therapist_id
+FROM Call;
+GO
+
+CREATE TRIGGER CancelCallViewTrigger
+ON CallView
+INSTEAD OF DELETE
+AS
+BEGIN
+DELETE FROM Call
+WHERE id IN (SELECT id FROM deleted WHERE visit_status = 0);
+IF EXISTS (SELECT 1 FROM deleted WHERE visit_status = 1)
+BEGIN
+PRINT 'Нельзя отменить завершение вызовы!';
+END
+END;
+GO
+
+DELETE FROM CallView WHERE id = 4;
+DELETE FROM CallView WHERE id = 1;
