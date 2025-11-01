@@ -51,25 +51,26 @@ SELECT @doctor AS doctor;
 
 
 --Процедура, находящаяся один из участков с максимальным количеством домов и возвращающая ФИО врача, обслуживающего данный участок (с использованием вызова предыдущей процедуры)
-CREATE PROCEDURE GetTherapistMaxHouses  
-@therapist_name WARCHAR(100) OUTPUT  
+CREATE PROCEDURE GetTherapistMaxHousesTest2  
+    @therapist_name NVARCHAR(100) OUTPUT  
 AS  
 BEGIN  
-DECLARE @max_district INT;  
-SELECT TOP 1 @max_district = p.district_id  
-FROM Patient p  
-GROUP BY p.district_id  
-ORDER BY COUNT(DISTINCT p.house_number) DESC;  
-SELECT @therapist_name = t.full_name  
-FROM Therapist t  
-WHERE t.district_id = @max_district;  
+    DECLARE @max_district_number INT;
+    SELECT TOP 1 @max_district_number = d.district_number
+    FROM District d
+    INNER JOIN Patient p ON d.id = p.district_id
+    GROUP BY d.id, d.district_number
+    ORDER BY COUNT(DISTINCT p.house_number) DESC;
+
+    EXEC GetDistrictTherapist 
+        @district_number = @max_district_number, 
+        @therapist_name = @therapist_name OUTPUT;
 END;  
-GO  
+GO
 
 DECLARE @doctor_max NVARCHAR(100);  
-EXEC GetTherapistMaxHouses @therapist_name = @doctor_max OUTPUT;  
+EXEC GetTherapistMaxHousesTest2 @therapist_name = @doctor_max OUTPUT;  
 SELECT @doctor_max AS doctor_max_houses;
-
 
 --Скалярная функция, возвращающая по адресу (улица, дом) номер участка
 CREATE FUNCTION GetDistrictByAddress(
