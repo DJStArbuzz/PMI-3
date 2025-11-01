@@ -331,7 +331,7 @@ c) Замещающий триггер на операцию отмены выз
 </h3>
 </p3>
 
-![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab1/4.png)
+![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab4/1.png)
 
-![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab1/4.png)
+![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab4/2.png)
 </p3>
