@@ -1,0 +1,138 @@
+--a)  Выбрать пациентов (ФИО), которые за последний месяц > 3 раз вызывали врача
+SELECT P.full_name
+FROM Patient P
+JOIN Call C ON P.id = C.patient_id
+WHERE YEAR(C.appeal_date) = 2024 AND MONTH(C.appeal_date) = 1
+GROUP BY P.id, P.full_name
+HAVING COUNT(C.id) > 0;
+
+SELECT DISTINCT P.full_name
+FROM PatientNode P, ReceivedEdge R, CallNode C
+WHERE MATCH(P<-(R)-C)
+  AND YEAR(C.appeal_date) = 2024 
+  AND MONTH(C.appeal_date) = 1;
+
+
+ --b)  Выдать пациентов, ожидающих посещения врача (ФИО,адрес,участок,врач)
+SELECT 
+    P.full_name AS ФИО,
+    P.street + ', д.' + CAST(P.house_number AS VARCHAR) AS адрес,
+    D.district_number AS участок,
+    T.full_name AS врач
+FROM Patient P
+JOIN Call C ON P.id = C.patient_id
+JOIN Therapist T ON C.therapist_id = T.id
+JOIN District D ON P.district_id = D.id
+WHERE C.visit_status = 0;
+
+
+SELECT 
+    P.full_name AS ФИО,
+    P.street + ', д.' + CAST(P.house_number AS VARCHAR) AS адрес,
+    D.district_number AS участок,
+    T.full_name AS врач
+FROM PatientNode P, 
+     CallNode C, 
+     TherapistNode T, 
+     DistrictNode D,
+     ReceivedEdge R,
+     PerformedEdge PE,
+     LivesInEdge L
+WHERE MATCH(P<-(R)-C) 
+  AND MATCH(C-(PE)->T)
+  AND MATCH(P-(L)->D)
+  AND C.visit_status = 0;
+
+
+--c)  По адресу пациента определить номер участка
+-- версия по district_id
+  SELECT 
+    P.full_name,
+    P.street,
+    P.house_number,
+    D.district_number AS номер_участка
+FROM Patient P
+JOIN District D ON P.district_id = D.id;
+
+SELECT 
+    P.full_name,
+    P.street,
+    P.house_number,
+    D.district_number AS номер_участка
+FROM PatientNode P, DistrictNode D, LivesInEdge L
+WHERE MATCH(P-(L)->D);
+
+--d)  По дате и времени обращения определить примерное 
+-- время посещения врача (предполагая, что на каждое посещение врач тратит 30 мин. и выход на вызова начинается с 12 ч.)
+
+SELECT 
+    id,
+    appeal_date,
+    start_time,
+    end_time,
+    visit_status,
+    patient_id,
+    therapist_id,
+   DATEADD(
+        MINUTE, 
+        (ROW_NUMBER() OVER (PARTITION BY appeal_date ORDER BY start_time) - 1) * 30,
+        CAST(appeal_date AS DATETIME) + CAST('12:00:00' AS DATETIME)
+    ) AS estimated_visit_time
+FROM Call
+ORDER BY appeal_date, start_time;
+
+
+SELECT 
+    c.id,
+    c.appeal_date,
+    c.start_time,
+    c.end_time,
+    c.visit_status,
+    p.id AS patient_id,
+    t.id AS therapist_id,
+    DATEADD(
+        MINUTE, 
+        (ROW_NUMBER() OVER (PARTITION BY c.appeal_date ORDER BY c.start_time) - 1) * 30,
+        CAST(c.appeal_date AS DATETIME) + CAST('12:00:00' AS DATETIME)
+    ) AS estimated_visit_time
+FROM CallNode c, ReceivedEdge rec, PatientNode p, PerformedEdge perf, TherapistNode t
+WHERE MATCH(c-(rec)->p) AND MATCH(c-(perf)->t)
+ORDER BY c.appeal_date, c.start_time;
+
+
+--e)  Определить диагнозы, по которым превышен порог заболеваемости 10% 
+-- (от общего количества вызовов) и выдать для каждого из
+-- них количество вызовов
+
+WITH DiagnosisStats AS (
+    SELECT 
+        D.name AS диагноз,
+        COUNT(CD.diagnosis_id) AS количество_вызовов,
+        COUNT(CD.diagnosis_id) * 100.0 / (SELECT COUNT(*) FROM Call_diagnosis) AS процент
+    FROM Call_diagnosis CD
+    JOIN Diagnosis D ON CD.diagnosis_id = D.id
+    GROUP BY D.id, D.name
+)
+SELECT 
+    диагноз,
+    количество_вызовов,
+    процент
+FROM DiagnosisStats
+WHERE процент > 10;
+
+
+WITH DiagnosisStats AS (
+    SELECT 
+        D.name AS диагноз,
+        COUNT(C.id) AS количество_вызовов,
+        COUNT(C.id) * 100.0 / (SELECT COUNT(*) FROM HasDiagnosisEdge) AS процент
+    FROM CallNode C, HasDiagnosisEdge H, DiagnosisNode D
+    WHERE MATCH(C-(H)->D)
+    GROUP BY D.id, D.name
+)
+SELECT 
+    диагноз,
+    количество_вызовов,
+    процент
+FROM DiagnosisStats
+WHERE процент > 10;
