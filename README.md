@@ -329,7 +329,9 @@ b) Последующий триггер на изменение диагноз�
 
 c) Замещающий триггер на операцию отмены вызова – если врач еще не посетил этого пациента, то вызов можно отменить, в противном случае строка с этим вызовом не удаляется
 
+![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab4/1.png)
 
+![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab4/2.png)
 # <img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Lab4 Лабораторная работа №5
 
 <p aligh="justify>
@@ -364,7 +366,9 @@ c) Замещающий триггер на операцию отмены выз
 2.	Скрипт для создания и заполнения графовых таблиц
 3.	Запросы из задания 3.2 к двум моделям(реляционная, графовая.)
 
-![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab4/1.png)
 
-![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab4/2.png)
+![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab6/схема.png)
+
+![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab6/testA.png)
+![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab6/testB.png)
 </p3>
