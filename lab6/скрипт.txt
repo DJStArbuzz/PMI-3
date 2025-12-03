@@ -1,0 +1,119 @@
+-- создание графовых таблиц
+CREATE TABLE DistrictNode (
+    id INT PRIMARY KEY,
+    district_number INT NOT NULL UNIQUE,
+    streets NVARCHAR(500) NOT NULL
+) AS NODE;
+
+CREATE TABLE DiagnosisNode (
+    id INT PRIMARY KEY,
+    name NVARCHAR(100) NOT NULL UNIQUE,
+    description NVARCHAR(1000) NOT NULL DEFAULT ''
+) AS NODE;
+
+CREATE TABLE PatientNode (
+    id INT PRIMARY KEY,
+    full_name NVARCHAR(100) NOT NULL,
+    street NVARCHAR(100) NOT NULL,
+    house_number INT NOT NULL
+) AS NODE;
+
+CREATE TABLE TherapistNode (
+    id INT PRIMARY KEY,
+    full_name NVARCHAR(100) NOT NULL,
+    phone NVARCHAR(20) NOT NULL,
+    office_number INT NOT NULL
+) AS NODE;
+
+CREATE TABLE ScheduleNode (
+    id INT PRIMARY KEY,
+    day_of_week SMALLINT NOT NULL CHECK (day_of_week BETWEEN 1 AND 7),
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL
+) AS NODE;
+
+CREATE TABLE CallNode (
+    id INT PRIMARY KEY,
+    appeal_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL DEFAULT '00:00',
+    visit_status BIT NOT NULL DEFAULT 0
+) AS NODE;
+
+-- ребра
+-- (Patient -> District)
+CREATE TABLE LivesInEdge AS EDGE;
+
+-- (Therapist -> District)
+CREATE TABLE WorksInEdge AS EDGE;
+
+-- (Call -> Patient)
+CREATE TABLE ReceivedEdge AS EDGE;
+
+-- (Call -> Therapist)
+CREATE TABLE PerformedEdge AS EDGE;
+
+-- (Schedule -> Therapist)
+CREATE TABLE ScheduledEdge AS EDGE;
+
+-- (Call -> Diagnosis)
+CREATE TABLE HasDiagnosisEdge (
+    doctor_comment NVARCHAR(500) NOT NULL DEFAULT ''
+) AS EDGE;
+
+INSERT INTO PatientNode (id, full_name, street, house_number)
+SELECT id, full_name, street, house_number FROM Patient;
+
+INSERT INTO TherapistNode (id, full_name, phone, office_number)
+SELECT id, full_name, phone, office_number FROM Therapist;
+
+INSERT INTO DistrictNode (id, district_number, streets)
+SELECT id, district_number, streets FROM District;
+
+INSERT INTO DiagnosisNode (id, name, description)
+SELECT id, name, description FROM Diagnosis;
+
+INSERT INTO CallNode (id, appeal_date, start_time, end_time, visit_status)
+SELECT id, appeal_date, start_time, end_time, visit_status FROM Call;
+
+INSERT INTO ScheduleNode (id, day_of_week, start_time, end_time)
+SELECT id, day_of_week, start_time, end_time FROM Therapist_schedule;
+
+INSERT INTO LivesInEdge ($from_id, $to_id)
+SELECT 
+    (SELECT $node_id FROM PatientNode WHERE id = p.id),
+    (SELECT $node_id FROM DistrictNode WHERE id = p.district_id)
+FROM Patient p;
+
+INSERT INTO WorksInEdge ($from_id, $to_id)
+SELECT 
+    (SELECT $node_id FROM TherapistNode WHERE id = t.id),
+    (SELECT $node_id FROM DistrictNode WHERE id = t.district_id)
+FROM Therapist t;
+
+INSERT INTO ReceivedEdge ($from_id, $to_id)
+SELECT 
+    (SELECT $node_id FROM CallNode WHERE id = c.id),
+    (SELECT $node_id FROM PatientNode WHERE id = c.patient_id)
+FROM Call c;
+
+INSERT INTO PerformedEdge ($from_id, $to_id)
+SELECT 
+    (SELECT $node_id FROM CallNode WHERE id = c.id),
+    (SELECT $node_id FROM TherapistNode WHERE id = c.therapist_id)
+FROM Call c;
+
+INSERT INTO ScheduledEdge ($from_id, $to_id)
+SELECT 
+    (SELECT $node_id FROM ScheduleNode WHERE id = ts.id),
+    (SELECT $node_id FROM TherapistNode WHERE id = ts.therapist_id)
+FROM Therapist_schedule ts;
+
+INSERT INTO HasDiagnosisEdge ($from_id, $to_id, doctor_comment)
+SELECT 
+    (SELECT $node_id FROM CallNode WHERE id = cd.call_id),
+    (SELECT $node_id FROM DiagnosisNode WHERE id = cd.diagnosis_id),
+    cd.doctor_comment
+FROM Call_diagnosis cd;
+
+
