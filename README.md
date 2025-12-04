@@ -293,7 +293,7 @@ e)  Определить диагнозы, по которым превышен 
 
 </h3>
 
-# <img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Lab4 Лабораторная работа №4
+# <img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Лабораторная работа №4
 
 
 <p aligh="justify>
@@ -332,7 +332,7 @@ c) Замещающий триггер на операцию отмены выз
 ![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab4/1.png)
 
 ![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab4/2.png)
-# <img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Lab4 Лабораторная работа №5
+# <img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Лабораторная работа №5
 
 <p aligh="justify>
 <h3>
@@ -351,7 +351,7 @@ c) Замещающий триггер на операцию отмены выз
 2. Используя механизмы представлений, хранимых процедур и функций.
 Члены 1 роли должны видеть оригинальные данные, члены 2 роли маскированные.
 
-# <img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Lab4 Лабораторная работа №6
+# <img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Лабораторная работа №6
 
 <p aligh="justify>
 <h3>
