@@ -1,4 +1,4 @@
-1.
+//1.
 db.restaurants.find(
     {},
     {
@@ -10,7 +10,7 @@ db.restaurants.find(
     }
 ).limit(5)
 
-2.
+//2.
 db.restaurants.find(
     { borough: "Bronx" },
     {
@@ -24,7 +24,7 @@ db.restaurants.find(
 .sort({ name: 1 })
 .limit(5)
 
-3.
+//3.
 db.restaurants.find({
     "grades": {
         $elemMatch: {
@@ -41,7 +41,7 @@ db.restaurants.find({
     "grades.score": 1
 }).limit(10)
 
-4.
+//4.
 db.restaurants.find({
     cuisine: { $ne: "American" },
     "grades.grade": "A",
@@ -57,7 +57,7 @@ db.restaurants.find({
 .sort({ cuisine: -1 })
 .limit(10)
 
-5.
+//5.
 db.restaurants.find(
     { name: /^Wil/ },
     {
@@ -70,7 +70,7 @@ db.restaurants.find(
 )
 
 
-6.
+//6.
 db.restaurants.find({
     borough: "Bronx",
     cuisine: { $in: ["American", "Chinese"] }
@@ -84,7 +84,7 @@ db.restaurants.find({
 }).limit(10)
 
 
-7. 
+//7. 
 db.restaurants.find({
     "grades": {
         $elemMatch: {
@@ -102,7 +102,8 @@ db.restaurants.find({
 })
 
 
-8. db.restaurants.aggregate([
+//8. 
+db.restaurants.aggregate([
     {
         $group: {
             _id: {
@@ -129,7 +130,7 @@ db.restaurants.find({
 ])
 
 
-9. 
+//9. 
 db.restaurants.aggregate([
     { $match: { borough: "Bronx" } },
     {
@@ -154,7 +155,7 @@ db.restaurants.aggregate([
 ])
 
 
-10.
+//10.
 db.restaurants.insertOne({
     "address": {
         "building": "15",
@@ -176,7 +177,7 @@ db.restaurants.insertOne({
 })
 
 
-11. 
+//11. 
 db.restaurants.updateOne(
     { restaurant_id: "325325325" },
     {
@@ -195,7 +196,7 @@ db.restaurants.updateOne(
 )
 
 
-12.
+//12.
 db.restaurants.updateOne(
     { restaurant_id: "325325325" },
     {
