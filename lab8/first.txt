@@ -1,1 +1,214 @@
-abacaba
+1.
+db.restaurants.find(
+    {},
+    {
+        _id: 0,
+        restaurant_id: 1,
+        name: 1,
+        borough: 1,
+        cuisine: 1
+    }
+).limit(5)
+
+2.
+db.restaurants.find(
+    { borough: "Bronx" },
+    {
+        _id: 0,
+        restaurant_id: 1,
+        name: 1,
+        borough: 1,
+        cuisine: 1
+    }
+)
+.sort({ name: 1 })
+.limit(5)
+
+3.
+db.restaurants.find({
+    "grades": {
+        $elemMatch: {
+            "score": { $gt: 80, $lt: 100 }
+        }
+    }
+},
+{
+    _id: 0,
+    restaurant_id: 1,
+    name: 1,
+    borough: 1,
+    cuisine: 1,
+    "grades.score": 1
+}).limit(10)
+
+4.
+db.restaurants.find({
+    cuisine: { $ne: "American" },
+    "grades.grade": "A",
+    borough: { $ne: "Brooklyn" }
+},
+{
+    _id: 0,
+    restaurant_id: 1,
+    name: 1,
+    borough: 1,
+    cuisine: 1
+})
+.sort({ cuisine: -1 })
+.limit(10)
+
+5.
+db.restaurants.find(
+    { name: /^Wil/ },
+    {
+        _id: 0,
+        restaurant_id: 1,
+        name: 1,
+        borough: 1,
+        cuisine: 1
+    }
+)
+
+
+6.
+db.restaurants.find({
+    borough: "Bronx",
+    cuisine: { $in: ["American", "Chinese"] }
+},
+{
+    _id: 0,
+    restaurant_id: 1,
+    name: 1,
+    borough: 1,
+    cuisine: 1
+}).limit(10)
+
+
+7. 
+db.restaurants.find({
+    "grades": {
+        $elemMatch: {
+            "date": ISODate("2014-08-11T00:00:00Z"),
+            "grade": "A",
+            "score": 9
+        }
+    }
+},
+{
+    _id: 0,
+    restaurant_id: 1,
+    name: 1,
+    grades: 1
+})
+
+
+8. db.restaurants.aggregate([
+    {
+        $group: {
+            _id: {
+                borough: "$borough",
+                cuisine: "$cuisine"
+            },
+            count: { $sum: 1 }
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            borough: "$_id.borough",
+            cuisine: "$_id.cuisine",
+            count: 1
+        }
+    },
+    {
+        $sort: {
+            borough: 1,
+            cuisine: 1
+        }
+    }
+])
+
+
+9. 
+db.restaurants.aggregate([
+    { $match: { borough: "Bronx" } },
+    {
+        $addFields: {
+            totalScore: {
+                $sum: "$grades.score"
+            }
+        }
+    },
+    { $sort: { totalScore: 1 } },
+    { $limit: 1 },
+    {
+        $project: {
+            _id: 0,
+            restaurant_id: 1,
+            name: 1,
+            borough: 1,
+            totalScore: 1,
+            "grades.score": 1
+        }
+    }
+])
+
+
+10.
+db.restaurants.insertOne({
+    "address": {
+        "building": "15",
+        "coord": [37.6173, 55.7558],
+        "street": "Тверская улица",
+        "zipcode": 125009
+    },
+    "borough": "Центральный",
+    "cuisine": "Русская",
+    "grades": [
+        {
+            "date": new Date("2024-01-15T00:00:00Z"),
+            "grade": "A",
+            "score": 10
+        }
+    ],
+    "name": "Старик Хинкалыч",
+    "restaurant_id": "325325325"
+})
+
+
+11. 
+db.restaurants.updateOne(
+    { restaurant_id: "325325325" },
+    {
+        $set: {
+            "opening_hours": {
+                "monday": "10:00-23:00",
+                "tuesday": "10:00-23:00",
+                "wednesday": "10:00-23:00",
+                "thursday": "10:00-23:00",
+                "friday": "10:00-00:00",
+                "saturday": "11:00-00:00",
+                "sunday": "11:00-22:00"
+            }
+        }
+    }
+)
+
+
+12.
+db.restaurants.updateOne(
+    { restaurant_id: "325325325" },
+    {
+        $set: {
+            "opening_hours": {
+                "monday": "09:00-22:00",
+                "tuesday": "09:00-22:00",
+                "wednesday": "09:00-22:00",
+                "thursday": "09:00-22:00",
+                "friday": "09:00-23:00",
+                "saturday": "10:00-23:00",
+                "sunday": "10:00-21:00"
+            }
+        }
+    }
+)
