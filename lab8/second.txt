@@ -1,0 +1,284 @@
+//1
+db.weather.aggregate([
+    {
+        $group: {
+            _id: null,
+            maxTemp: { $max: "$temperature" },
+            minTemp: { $min: "$temperature" }
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            maxTemperature: "$maxTemp",
+            minTemperature: "$minTemp",
+            temperatureDifference: { $subtract: ["$maxTemp", "$minTemp"] }
+        }
+    }
+])
+
+
+//2
+db.weather.aggregate([
+    {
+        $group: {
+            _id: {
+                year: "$year",
+                month: "$month",
+                day: "$day"
+            },
+            dailyAvgTemp: { $avg: "$temperature" }
+        }
+    },
+    {
+        $sort: { dailyAvgTemp: 1 }
+    },
+    {
+        $group: {
+            _id: null,
+            allDays: { $push: "$dailyAvgTemp" },
+            totalDays: { $sum: 1 }
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            filteredTemps: {
+                $slice: [
+                    "$allDays",
+                    10,
+                    { $subtract: ["$totalDays", 20] }
+                ]
+            }
+        }
+    },
+    {
+        $unwind: "$filteredTemps"
+    },
+    {
+        $group: {
+            _id: null,
+            averageTemperature: { $avg: "$filteredTemps" }
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            averageTemperatureExcludingExtremes: { $round: ["$averageTemperature", 2] }
+        }
+    }
+])
+
+
+//3
+db.weather.aggregate([
+    {
+        $match: {
+            wind_direction: "Южный"
+        }
+    },
+    {
+        $sort: { temperature: 1 }
+    },
+    {
+        $limit: 10
+    },
+    {
+        $group: {
+            _id: null,
+            records: { $push: {
+                date: { 
+                    year: "$year", 
+                    month: "$month", 
+                    day: "$day", 
+                    hour: "$hour" 
+                },
+                temperature: "$temperature",
+                wind: "$wind"
+            }},
+            averageTemperature: { $avg: "$temperature" }
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            averageTemperature: { $round: ["$averageTemperature", 2] },
+            records: 1
+        }
+    }
+])
+
+
+//4
+db.weather.aggregate([
+    {
+        $match: {
+            temperature: { $lt: 0 },
+            code: "SN"
+        }
+    },
+    {
+        $group: {
+            _id: {
+                year: "$year",
+                month: "$month",
+                day: "$day"
+            }
+        }
+    },
+    {
+        $count: "snowyDays"
+    }
+])
+
+
+//5
+db.weather.aggregate([
+    {
+        $match: {
+            month: { $in: [12, 1, 2] },
+            code: { $in: ["SN", "RN"] }
+        }
+    },
+    {
+        $group: {
+            _id: "$code",
+            count: { $sum: 1 }
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            precipitationType: "$_id",
+            count: 1
+        }
+    },
+    {
+        $sort: { precipitationType: 1 }
+    }
+])
+
+
+//6
+db.weather.aggregate([
+    {
+        $group: {
+            _id: {
+                year: "$year",
+                month: "$month",
+                day: "$day"
+            },
+            totalMeasurements: { $sum: 1 },
+            clearMeasurements: {
+                $sum: {
+                    $cond: [{ $eq: ["$code", "CL"] }, 1, 0]
+                }
+            },
+            hasPrecipitation: {
+                $max: {
+                    $cond: [
+                        { $in: ["$code", ["SN", "RN"]] },
+                        1, 0
+                    ]
+                }
+            }
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            clearPercentage: {
+                $multiply: [
+                    { $divide: ["$clearMeasurements", "$totalMeasurements"] },
+                    100
+                ]
+            },
+            hasPrecipitation: 1
+        }
+    },
+    {
+        $match: {
+            clearPercentage: { $gt: 75 }
+        }
+    },
+    {
+        $group: {
+            _id: null,
+            totalClearDays: { $sum: 1 },
+            daysWithPrecipitation: { $sum: "$hasPrecipitation" }
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            totalClearDays: 1,
+            daysWithPrecipitation: 1,
+            probabilityPercent: {
+                $round: [{
+                    $multiply: [
+                        { $divide: ["$daysWithPrecipitation", "$totalClearDays"] },
+                        100
+                    ]
+                }, 2]
+            }
+        }
+    }
+])
+
+
+//7
+const beforeUpdate = db.weather.aggregate([
+    {
+        $match: {
+            month: { $in: [12, 1, 2] }
+        }
+    },
+    {
+        $group: {
+            _id: null,
+            avgTempBefore: { $avg: "$temperature" }
+        }
+    }
+]).toArray()[0];
+
+db.weather.updateMany(
+    {
+        month: { $in: [12, 1, 2] },
+        day: { $mod: [2, 1] }
+    },
+    {
+        $inc: { temperature: 1 }
+    }
+);
+
+const afterUpdate = db.weather.aggregate([
+    {
+        $match: {
+            month: { $in: [12, 1, 2] }
+        }
+    },
+    {
+        $group: {
+            _id: null,
+            avgTempAfter: { $avg: "$temperature" }
+        }
+    }
+]).toArray()[0];
+
+const result = {
+    averageTemperatureBefore: beforeUpdate.avgTempBefore.toFixed(2),
+    averageTemperatureAfter: afterUpdate.avgTempAfter.toFixed(2),
+    temperatureChange: (afterUpdate.avgTempAfter - beforeUpdate.avgTempBefore).toFixed(2)
+};
+
+printjson(result);
+
+db.weather.updateMany(
+    {
+        month: { $in: [12, 1, 2] },
+        day: { $mod: [2, 1] }
+    },
+    {
+        $inc: { temperature: -1 }
+    }
+);
