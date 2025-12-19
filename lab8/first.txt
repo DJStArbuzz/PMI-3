@@ -88,19 +88,17 @@ db.restaurants.find({
 db.restaurants.find({
     "grades": {
         $elemMatch: {
-            "date": ISODate("2014-08-11T00:00:00Z"),
             "grade": "A",
-            "score": 9
+            "score": 9,
+            "date.$date": 1407715200000
         }
     }
-},
-{
+}, {
     _id: 0,
     restaurant_id: 1,
     name: 1,
     grades: 1
 })
-
 
 //8. 
 db.restaurants.aggregate([
