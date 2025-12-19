@@ -19,20 +19,15 @@ db.weather.aggregate([
 
 
 //2
+
 db.weather.aggregate([
     {
         $group: {
-            _id: {
-                year: "$year",
-                month: "$month",
-                day: "$day"
-            },
+            _id: { year: "$year", month: "$month", day: "$day" },
             dailyAvgTemp: { $avg: "$temperature" }
         }
     },
-    {
-        $sort: { dailyAvgTemp: 1 }
-    },
+    { $sort: { dailyAvgTemp: 1 } },
     {
         $group: {
             _id: null,
@@ -42,19 +37,12 @@ db.weather.aggregate([
     },
     {
         $project: {
-            _id: 0,
             filteredTemps: {
-                $slice: [
-                    "$allDays",
-                    10,
-                    { $subtract: ["$totalDays", 20] }
-                ]
+                $slice: ["$allDays", 10, { $subtract: ["$totalDays", 20] }]
             }
         }
     },
-    {
-        $unwind: "$filteredTemps"
-    },
+    { $unwind: "$filteredTemps" },
     {
         $group: {
             _id: null,
@@ -72,158 +60,133 @@ db.weather.aggregate([
 
 //3
 db.weather.aggregate([
-    {
-        $match: {
-            wind_direction: "Южный"
-        }
-    },
-    {
-        $sort: { temperature: 1 }
-    },
-    {
-        $limit: 10
-    },
-    {
-        $group: {
-            _id: null,
-            records: { $push: {
-                date: { 
-                    year: "$year", 
-                    month: "$month", 
-                    day: "$day", 
-                    hour: "$hour" 
-                },
-                temperature: "$temperature",
-                wind: "$wind"
-            }},
-            averageTemperature: { $avg: "$temperature" }
-        }
-    },
-    {
-        $project: {
-            _id: 0,
-            averageTemperature: { $round: ["$averageTemperature", 2] },
-            records: 1
-        }
+  {
+    $match: { wind_direction: "Южный" }
+  },
+  {
+    $sort: { temperature: 1 }
+  },
+  {
+    $limit: 10
+  },
+  {
+    $group: {
+      _id: null,
+      averageTemperature: { $avg: "$temperature" },
+      temperatures: { $push: "$temperature" }
     }
+  },
+  {
+    $project: {
+      _id: 0,
+      averageTemperature: { $round: ["$averageTemperature", 2] }
+    }
+  }
 ])
 
 
 //4
 db.weather.aggregate([
-    {
-        $match: {
-            temperature: { $lt: 0 },
-            code: "SN"
-        }
-    },
+    { $match: { temperature: { $lt: 0 }, code: "SN" } },
     {
         $group: {
-            _id: {
-                year: "$year",
-                month: "$month",
-                day: "$day"
-            }
+            _id: { year: "$year", month: "$month", day: "$day" }
         }
     },
-    {
-        $count: "snowyDays"
-    }
+    { $count: "snowyDays" }
 ])
 
 
 //5
 db.weather.aggregate([
-    {
-        $match: {
-            month: { $in: [12, 1, 2] },
-            code: { $in: ["SN", "RN"] }
-        }
-    },
-    {
-        $group: {
-            _id: "$code",
-            count: { $sum: 1 }
-        }
-    },
-    {
-        $project: {
-            _id: 0,
-            precipitationType: "$_id",
-            count: 1
-        }
-    },
-    {
-        $sort: { precipitationType: 1 }
+  {
+    $match: {
+      month: { $in: [12, 1, 2] },
+      code: { $in: ["SN", "RA"] }
     }
+  },
+  {
+    $group: {
+      _id: null,
+      snowDays: {
+        $sum: { $cond: [{ $eq: ["$code", "SN"] }, 1, 0] }
+      },
+      rainDays: {
+        $sum: { $cond: [{ $eq: ["$code", "RA"] }, 1, 0] }
+      }
+    }
+  },
+  {
+    $project: {
+      _id: 0,
+      snowDays: 1,
+      rainDays: 1,
+      difference: { $subtract: ["$snowDays", "$rainDays"] }
+    }
+  }
 ])
+
 
 
 //6
+
 db.weather.aggregate([
-    {
-        $group: {
-            _id: {
-                year: "$year",
-                month: "$month",
-                day: "$day"
-            },
-            totalMeasurements: { $sum: 1 },
-            clearMeasurements: {
-                $sum: {
-                    $cond: [{ $eq: ["$code", "CL"] }, 1, 0]
-                }
-            },
-            hasPrecipitation: {
-                $max: {
-                    $cond: [
-                        { $in: ["$code", ["SN", "RN"]] },
-                        1, 0
-                    ]
-                }
-            }
+
+  {
+    $group: {
+      _id: {
+        year: "$year",
+        month: "$month",
+        day: "$day"
+      },
+      total: { $sum: 1 },
+      clear: {
+        $sum: { $cond: [{ $lt: ["$clouds", 7] }, 1, 0] }
+      },
+      hasPrecip: {
+        $max: {
+          $cond: [
+            { $in: ["$code", ["RA", "SN","SHRA","TS","BR"]] },
+            1,
+            0
+          ]
         }
-    },
-    {
-        $project: {
-            _id: 0,
-            clearPercentage: {
-                $multiply: [
-                    { $divide: ["$clearMeasurements", "$totalMeasurements"] },
-                    100
-                ]
-            },
-            hasPrecipitation: 1
-        }
-    },
-    {
-        $match: {
-            clearPercentage: { $gt: 75 }
-        }
-    },
-    {
-        $group: {
-            _id: null,
-            totalClearDays: { $sum: 1 },
-            daysWithPrecipitation: { $sum: "$hasPrecipitation" }
-        }
-    },
-    {
-        $project: {
-            _id: 0,
-            totalClearDays: 1,
-            daysWithPrecipitation: 1,
-            probabilityPercent: {
-                $round: [{
-                    $multiply: [
-                        { $divide: ["$daysWithPrecipitation", "$totalClearDays"] },
-                        100
-                    ]
-                }, 2]
-            }
-        }
+      }
     }
+  },
+  // Фильтруем ясные дни (>75%)
+  {
+    $match: {
+      $expr: { $gt: [{ $divide: ["$clear", "$total"] }, 0.75] }
+    }
+  },
+
+  {
+    $group: {
+      _id: null,
+      clearDays: { $sum: 1 },
+      precipDays: { $sum: "$hasPrecip" }
+    }
+  },
+
+  {
+    $project: {
+      _id: 0,
+      clearDays: 1,
+      precipDays: 1,
+      probability: {
+        $round: [
+          { $multiply: [
+            { $divide: ["$precipDays", "$clearDays"] },
+            100
+          ]},
+          2
+        ]
+      }
+    }
+  }
 ])
+
 
 
 //7
