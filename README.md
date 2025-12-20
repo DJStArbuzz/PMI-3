@@ -418,9 +418,10 @@ c) Замещающий триггер на операцию отмены выз
 
 
 Содержание отчета:
+<ul>
  Сценарий и протокол его выполнения.
  Краткие выводы о навыках, приобретенных в ходе выполнения работы. 
-
+</ul>
 Примеры тестов:
 ![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab7/6.png)
 ![image](https://github.com/DJStArbuzz/PMI-3/blob/main/lab7/7.png)
