@@ -1,17 +1,18 @@
 <h1 name="content" align="center"><a href=""><img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/></a> MSSQL</h1>
 
-<p align="center">
-  <a href="#-lab1"><img alt="lab1" src="https://img.shields.io/badge/Lab1-blue"></a> 
-  <a href="#-lab2"><img alt="lab2" src="https://img.shields.io/badge/Lab2-red"></a>
-  <a href="#-lab3"><img alt="lab3" src="https://img.shields.io/badge/Lab3-green"></a>
-  <a href="#-lab4"><img alt="lab4" src="https://img.shields.io/badge/Lab4-yellow"></a>
-  <a href="#-lab5"><img alt="lab5" src="https://img.shields.io/badge/Lab5-gray"></a>
-  <a href="#-lab6"><img alt="lab6" src="https://img.shields.io/badge/Lab6-orange"></a> 
-  <a href="#-lab7"><img alt="lab7" src="https://img.shields.io/badge/Lab7-brown"></a>
-  <a href="#-lab8"><img alt="lab8" src="https://img.shields.io/badge/Lab8-purple"></a>
+<p align="center"> 
+  <a href="#lab-1"><img alt="lab1" src="https://img.shields.io/badge/Lab1-g"></a>
+  <a href="#lab-2-pgsql"><img alt="lab2" src="https://img.shields.io/badge/Lab2-g"></a>
+  <a href="#lab-3-pgsql"><img alt="lab3" src="https://img.shields.io/badge/Lab3-g"></a>
+  <a href="#lab-4-pgsql"><img alt="lab4" src="https://img.shields.io/badge/Lab4-g"></a>
+  <a href="#lab-5-pgsql"><img alt="lab5" src="https://img.shields.io/badge/Lab5-g"></a>
+  <a href="#lab-6-pgsql-age"><img alt="lab6" src="https://img.shields.io/badge/Lab6-g"></a>
+    <a href="#lab-7-pgsql-age"><img alt="lab7" src="https://img.shields.io/badge/Lab7-g"></a>
+    <a href="#lab-8-pgsql-age"><img alt="lab8" src="https://img.shields.io/badge/Lab8-g"></a>
 </p>
 
-<img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Регистратура поликлиники – вызовы на дом (Вариант №3)
+
+Регистратура поликлиники – вызовы на дом (Вариант №3)
 <p aligh="justify>
 <h3>
   <a href="#client"></a>
@@ -28,7 +29,8 @@
 - Вывод по каждому диагнозу количества пациентов за заданный период.
 </h3>
 </p>
-# <img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/> Lab1 Лабораторная работа №1
+## Lab 1
+ Lab1 Лабораторная работа №1
 
 
 <p aligh="justify>
