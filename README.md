@@ -1,15 +1,17 @@
 <h1 name="content" align="center"><a href=""><img src="https://github.com/user-attachments/assets/e080adec-6af7-4bd2-b232-d43cb37024ac" width="20" height="20"/></a> MSSQL</h1>
 
-<p align="center"> 
-  <a href="#lab-1"><img alt="lab1" src="https://img.shields.io/badge/Lab1-g"></a>
-  <a href="#lab-2-pgsql"><img alt="lab2" src="https://img.shields.io/badge/Lab2-g"></a>
-  <a href="#lab-3-pgsql"><img alt="lab3" src="https://img.shields.io/badge/Lab3-g"></a>
-  <a href="#lab-4-pgsql"><img alt="lab4" src="https://img.shields.io/badge/Lab4-g"></a>
-  <a href="#lab-5-pgsql"><img alt="lab5" src="https://img.shields.io/badge/Lab5-g"></a>
-  <a href="#lab-6-pgsql-age"><img alt="lab6" src="https://img.shields.io/badge/Lab6-g"></a>
-    <a href="#lab-7-pgsql-age"><img alt="lab7" src="https://img.shields.io/badge/Lab7-g"></a>
-    <a href="#lab-8-pgsql-age"><img alt="lab8" src="https://img.shields.io/badge/Lab8-g"></a>
-</p>
+## 📋 Содержание лабораторных работ
+
+| Лабораторная | Название | Ссылка |
+|-------------|----------|--------|
+| Lab 1 | ER-модель и реляционная модель | [Перейти →](#lab-1) |
+| Lab 2 | Создание и заполнение БД | [Перейти →](#lab-2) |
+| Lab 3 | SQL-запросы | [Перейти →](#lab-3) |
+| Lab 4 | Хранимые процедуры и триггеры | [Перейти →](#lab-4) |
+| Lab 5 | Роли и безопасность | [Перейти →](#lab-5) |
+| Lab 6 | Графовые таблицы | [Перейти →](#lab-6) |
+| Lab 7 | Транзакции | [Перейти →](#lab-7) |
+| Lab 8 | MongoDB | [Перейти →](#lab-8) |
 
 
 Регистратура поликлиники – вызовы на дом (Вариант №3)
